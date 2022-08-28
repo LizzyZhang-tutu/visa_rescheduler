@@ -36,7 +36,7 @@ PUSH_USER = config['PUSHOVER']['PUSH_USER']
 LOCAL_USE = config['CHROMEDRIVER'].getboolean('LOCAL_USE')
 HUB_ADDRESS = config['CHROMEDRIVER']['HUB_ADDRESS']
 
-REGEX_CONTINUE = "//a[contains(text(),'Continuar')]"
+REGEX_CONTINUE = "//a[contains(text(),'Continue')]"
 
 
 # def MY_CONDITION(month, day): return int(month) == 11 and int(day) >= 5
@@ -136,6 +136,7 @@ def do_login_action():
 
     Wait(driver, 60).until(
         EC.presence_of_element_located((By.XPATH, REGEX_CONTINUE)))
+
     print("\tlogin successful!")
 
 
@@ -168,17 +169,17 @@ def reschedule(date):
     driver.get(APPOINTMENT_URL)
 
     data = {
-        "utf8": driver.find_element(by=By.NAME, value='utf8').get_attribute('value'),
-        "authenticity_token": driver.find_element(by=By.NAME, value='authenticity_token').get_attribute('value'),
-        "confirmed_limit_message": driver.find_element(by=By.NAME, value='confirmed_limit_message').get_attribute('value'),
-        "use_consulate_appointment_capacity": driver.find_element(by=By.NAME, value='use_consulate_appointment_capacity').get_attribute('value'),
-        "appointments[consulate_appointment][facility_id]": FACILITY_ID,
+        "utf8": driver.find_element(By.NAME, 'utf8').get_attribute('value'),
+        "authenticity_token": driver.find_element(By.NAME, 'authenticity_token').get_attribute('value'),
+        "confirmed_limit_message": driver.find_element(By.NAME, 'confirmed_limit_message').get_attribute('value'),
+        "use_consulate_appointment_capacity": driver.find_element(By.NAME, 'use_consulate_appointment_capacity').get_attribute('value'),
+        "appointments[consulate_appointment][facility_id]":94,
         "appointments[consulate_appointment][date]": date,
         "appointments[consulate_appointment][time]": time,
     }
 
     headers = {
-        "User-Agent": driver.execute_script("return navigator.userAgent;"),
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36",
         "Referer": APPOINTMENT_URL,
         "Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
     }
@@ -250,10 +251,7 @@ if __name__ == "__main__":
             print()
 
             dates = get_date()[:5]
-            if not dates:
-              msg = "List is empty"
-              send_notification(msg)
-              EXIT = True
+            
             print_dates(dates)
             date = get_available_date(dates)
             print()
@@ -267,9 +265,8 @@ if __name__ == "__main__":
                 break
 
             if not dates:
-              msg = "List is empty"
-              send_notification(msg)
-              #EXIT = True
+              print("List is empty, sleeping and retrying")
+              
               time.sleep(COOLDOWN_TIME)
             else:
               time.sleep(RETRY_TIME)
@@ -280,3 +277,4 @@ if __name__ == "__main__":
 
     if(not EXIT):
         send_notification("HELP! Crashed.")
+
